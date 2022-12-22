@@ -5,6 +5,7 @@ set -e
 export LND_PATH="/mnt/lnd/admin.macaroon"
 export CLN_PATH="/mnt/c-lightning/"
 export TOR_ADDRESS=$(yq e '.tor-address' /app/data/start9/config.yaml)
+export LAN_ADDRESS=$(yq e '.lan-address' /app/data/start9/config.yaml)
 export LNBITS_BACKEND_WALLET_CLASS=$(yq e '.wallet.type' /app/data/start9/config.yaml)
 export LNBITS_SERVICE_FEE=$(yq e '.service-fee' /app/data/start9/config.yaml)
 export FILE="/app/data/database.sqlite3"
@@ -46,22 +47,33 @@ fi
 while true; do {
     # Properties Page showing password to be used for login
     if [ -f $FILE ] ; then 
+        SUPERUSER_ACCOUNT=$(sqlite3 ./data/database.sqlite3 'select super_user from settings;')
+        SUPERUSER_ACCOUNT_URL_PROP="https://$LAN_ADDRESS/wallet?usr=$SUPERUSER_ACCOUNT"
         sqlite3 ./data/database.sqlite3 'select id from accounts;' > account.res
         mapfile -t LNBITS_ACCOUNTS <account.res
         echo 'version: 2' > /app/data/start9/stats.yaml
         echo 'data:' >> /app/data/start9/stats.yaml
-        NUM=1
-        for val in "${LNBITS_ACCOUNTS[@]}";
-        do 
-            ACCOUNT_URL_PROP="http://$TOR_ADDRESS/wallet?usr=$val"
-            echo "  LNBits Account $NUM: " >> /app/data/start9/stats.yaml
-                echo '    type: string' >> /app/data/start9/stats.yaml
-                echo "    value: \"$ACCOUNT_URL_PROP\"" >> /app/data/start9/stats.yaml
-                echo '    description: LNBits Account' >> /app/data/start9/stats.yaml
-                echo '    copyable: true' >> /app/data/start9/stats.yaml
-                echo '    masked: false' >> /app/data/start9/stats.yaml
-                echo '    qr: true' >> /app/data/start9/stats.yaml
-            NUM=$((NUM+1))
+        echo "  Superuser Account: " >> /app/data/start9/stats.yaml
+            echo '    type: string' >> /app/data/start9/stats.yaml
+            echo "    value: \"$SUPERUSER_ACCOUNT_URL_PROP\"" >> /app/data/start9/stats.yaml
+            echo '    description: LNBits Superuser Account' >> /app/data/start9/stats.yaml
+            echo '    copyable: true' >> /app/data/start9/stats.yaml
+            echo '    masked: false' >> /app/data/start9/stats.yaml
+            echo '    qr: true' >> /app/data/start9/stats.yaml
+        # Iterate over the indices of the array in reverse order
+        for i in $(seq $((${#LNBITS_ACCOUNTS[@]} - 1)) -1 0); do
+            # Access the array element at the current index
+            val=${LNBITS_ACCOUNTS[$i]} 
+            ACCOUNT_URL_PROP="https://$LAN_ADDRESS/wallet?usr=$val"
+            if ! [ "$SUPERUSER_ACCOUNT" = "$val" ] ; then 
+                echo "  LNBits Account $val: " >> /app/data/start9/stats.yaml
+                    echo '    type: string' >> /app/data/start9/stats.yaml
+                    echo "    value: \"$ACCOUNT_URL_PROP\"" >> /app/data/start9/stats.yaml
+                    echo '    description: LNBits Account' >> /app/data/start9/stats.yaml
+                    echo '    copyable: true' >> /app/data/start9/stats.yaml
+                    echo '    masked: false' >> /app/data/start9/stats.yaml
+                    echo '    qr: true' >> /app/data/start9/stats.yaml
+            fi
         done
     else 
         echo 'No accounts to populate'
@@ -69,7 +81,6 @@ while true; do {
     sleep 10
 } done &
 
-echo "Starting LNBits..."
+echo "Starting LNBits v0.9.5.1"
 
 exec tini -p SIGTERM -- poetry run lnbits --port $LNBITS_PORT --host $LNBITS_HOST 
-
