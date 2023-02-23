@@ -47,8 +47,6 @@ while true; do {
     if [ -f $FILE ] ; then 
         SUPERUSER_ACCOUNT=$(sqlite3 ./data/database.sqlite3 'select super_user from settings;')
         SUPERUSER_ACCOUNT_URL_PROP="https://$LAN_ADDRESS/wallet?usr=$SUPERUSER_ACCOUNT"
-        sqlite3 ./data/database.sqlite3 'select id from accounts;' > account.res
-        mapfile -t LNBITS_ACCOUNTS <account.res
         echo 'version: 2' > /app/data/start9/stats.yaml
         echo 'data:' >> /app/data/start9/stats.yaml
         echo "  Superuser Account: " >> /app/data/start9/stats.yaml
@@ -58,21 +56,35 @@ while true; do {
             echo '    copyable: true' >> /app/data/start9/stats.yaml
             echo '    masked: false' >> /app/data/start9/stats.yaml
             echo '    qr: true' >> /app/data/start9/stats.yaml
+        
+        sqlite3 ./data/database.sqlite3 'select id from accounts;' > account.res
+        mapfile -t LNBITS_ACCOUNTS <account.res 
         # Iterate over the indices of the array in reverse order
-        for i in $(seq $((${#LNBITS_ACCOUNTS[@]} - 1)) -1 0); do
+        for i in $(seq $((${#LNBITS_ACCOUNTS[@]} - 1)) -1 0); do {
             # Access the array element at the current index
             val=${LNBITS_ACCOUNTS[$i]} 
-            ACCOUNT_URL_PROP="https://$LAN_ADDRESS/wallet?usr=$val"
-            if ! [ "$SUPERUSER_ACCOUNT" = "$val" ] ; then 
-                echo "  LNBits Account $val: " >> /app/data/start9/stats.yaml
-                    echo '    type: string' >> /app/data/start9/stats.yaml
-                    echo "    value: \"$ACCOUNT_URL_PROP\"" >> /app/data/start9/stats.yaml
-                    echo '    description: LNBits Account' >> /app/data/start9/stats.yaml
-                    echo '    copyable: true' >> /app/data/start9/stats.yaml
-                    echo '    masked: false' >> /app/data/start9/stats.yaml
-                    echo '    qr: true' >> /app/data/start9/stats.yaml
-            fi
-        done
+            # get wallets for this user account
+            sqlite3 ./data/database.sqlite3 'select id from wallets where user="'$val'";' > wallet.res
+            mapfile -t LNBITS_WALLETS <wallet.res 
+            # Iterate over the indices of the array in reverse order
+            for j in $(seq $((${#LNBITS_WALLETS[@]} - 1)) -1 0); do {
+                # Access the array element at the current index
+
+                export val2=${LNBITS_WALLETS[$j]}
+                export ACCOUNT_URL_PROP="https://$LAN_ADDRESS/wallet?usr=$val&wal=$val2"
+                export LNBITS_WALLET_NAME=$(sqlite3 ./data/database.sqlite3 'select name from wallets where id="'$val2'";')
+
+                if ! [ "$SUPERUSER_ACCOUNT" = "$val" ] && ! [ "${val2:0:4}" = "del:" ] ; then
+                    echo "  LNBits Account $val - Wallet $LNBITS_WALLET_NAME: " >> /app/data/start9/stats.yaml
+                        echo '    type: string' >> /app/data/start9/stats.yaml
+                        echo "    value: \"$ACCOUNT_URL_PROP\"" >> /app/data/start9/stats.yaml
+                        echo '    description: LNBits Account' >> /app/data/start9/stats.yaml
+                        echo '    copyable: true' >> /app/data/start9/stats.yaml
+                        echo '    masked: false' >> /app/data/start9/stats.yaml
+                        echo '    qr: true' >> /app/data/start9/stats.yaml
+                fi
+            }   done 
+        }   done
     else 
         echo 'No accounts to populate'
     fi
