@@ -1,6 +1,6 @@
 id: lnbits 
 title: "LNBits"
-version: 0.9.7
+version: 0.9.7.1
 release-notes: | 
   * Update to new upstream version Fusion46 (v0.9.7)
     * [Release Notes](https://github.com/lnbits/lnbits/releases/tag/0.9.7)
