@@ -2,13 +2,17 @@ FROM python:3.10-slim
 
 # arm64 or amd64
 ARG PLATFORM
-ARG ARCH
 
 RUN apt-get clean
-RUN apt-get update && apt-get install -y curl wget bash tini pkg-config gcc make sqlite3 build-essential
+RUN apt-get update && apt-get install -y curl wget bash tini pkg-config sqlite3 build-essential
 RUN wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_${PLATFORM} && chmod +x /usr/local/bin/yq
 RUN curl -sSL https://install.python-poetry.org | python3 -
 ENV PATH="/root/.local/bin:$PATH"
+
+RUN echo "deb http://apt.postgresql.org/pub/repos/apt bullseye-pgdg main" > /etc/apt/sources.list.d/pgdg.list
+RUN wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
+RUN apt-get update
+RUN apt-get install -y postgresql-client-14
 
 WORKDIR /app/
 COPY lnbits-legend/ .
