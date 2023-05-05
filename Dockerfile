@@ -18,7 +18,6 @@ ENV LNBITS_HOST lnbits.embassy
 
 RUN poetry config virtualenvs.create false
 RUN poetry install --only main
-RUN poetry run python tools/build.py
 RUN pip install pyln-client
 
 RUN mkdir -p ./data
