@@ -22,6 +22,14 @@ clean:
 scripts/embassy.js: $(TS_FILES)
 	deno bundle scripts/embassy.ts scripts/embassy.js
 
+# for rebuilding just the arm image. will include docker-images/x86_64.tar into the s9pk if it exists
+arm: docker-images/aarch64.tar scripts/embassy.js
+	embassy-sdk pack
+
+# for rebuilding just the x86 image. will include docker-images/aarch64.tar into the s9pk if it exists
+x86: docker-images/x86_64.tar scripts/embassy.js
+	embassy-sdk pack
+
 docker-images/x86_64.tar: Dockerfile docker_entrypoint.sh
 	mkdir -p docker-images
 	docker buildx build --tag start9/$(PKG_ID)/main:$(PKG_VERSION) --platform=linux/amd64 --build-arg PLATFORM=amd64 -o type=docker,dest=docker-images/x86_64.tar .
