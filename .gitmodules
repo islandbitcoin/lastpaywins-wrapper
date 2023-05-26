@@ -1,0 +1,3 @@
+[submodule "LastPayWins"]
+	path = LastPayWins
+	url = https://github.com/alexlwn123/LastPayWins.git
