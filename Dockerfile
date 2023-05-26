@@ -10,7 +10,7 @@ RUN wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/d
 RUN apt-get purge -y --auto-remove wget && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /
-COPY lastpaywins/ .
+COPY LastPayWins/ .
 
 ADD .env.example ./.env
 RUN chmod a+x ./.env

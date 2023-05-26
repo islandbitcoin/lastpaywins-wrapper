@@ -1,14 +1,13 @@
-id: lastpaywins 
+id: lastpaywins
 title: "Last Pay Wins"
 version: 0.0.0.1
-release-notes: | 
-  * Initial pleb release 
+release-notes: "Initial pleb release"
 license: mit
-wrapper-repo: "https://github.com/islandbitcoin/lastpaywins-wrapper" "
+wrapper-repo: "https://github.com/islandbitcoin/lastpaywins-wrapper"
 upstream-repo: "https://github.com/alexlwn123/LastPayWins"
 support-site: "https://github.com/alexlwn123/LastPayWins/issues"
 marketing-site: "https://lastpaywins.com/"
-# donation-url: "https://legend.lnbits.com/paywall/GAqKguK5S8f6w5VNjS9DfK"
+donation-url: "https://atlbitlab.com/donations"
 build: ["make"]
 description:
   short: Similar to FOMO3D, but with sats.
@@ -38,7 +37,7 @@ health-checks:
     inject: true
     system: false
     io-format: json
-config: 
+config:
   get:
     type: script
   set:
@@ -80,29 +79,21 @@ dependencies:
     version: ">=0.14.3 <0.17.0"
     description: Used to communicate with the Lightning Network.
     requirement:
-      type: "opt-in"
-      how: Use the LND instance by default
-    config: ~
-  c-lightning:
-    version: ">=0.10.1 <24.0.0"
-    description: Used to communicate with the Lightning Network.
-    requirement:
-      type: "opt-in"
-      how: Can opt to use the CLN instance instead of LND
+      type: "required"
     config: ~
 backup:
   create:
     type: docker
     image: compat
-    system: true 
-    entrypoint: compat 
-    args: 
+    system: true
+    entrypoint: compat
+    args:
       - duplicity
       - create
       - /mnt/backup
       - /app/data/data
     mounts:
-      BACKUP: "/mnt/backup" 
+      BACKUP: "/mnt/backup"
       main: "/app/data/data"
   restore:
     type: docker
@@ -118,11 +109,11 @@ backup:
       BACKUP: "/mnt/backup"
       main: "/app/data/data"
 migrations:
- from:
-   "*":
-     type: script
-     args: ["from"]
- to:
-   "*":
-     type: script
-     args: ["to"]
+  from:
+    "*":
+      type: script
+      args: ["from"]
+  to:
+    "*":
+      type: script
+      args: ["to"]

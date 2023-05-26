@@ -4,32 +4,21 @@ import { compat, types as T } from "../deps.ts";
 
 export const getConfig: T.ExpectedExports.getConfig = compat.getConfig({
   "tor-address": {
-    "name": "Tor Address",
-    "description": "The Tor address of the network interface",
-    "type": "pointer",
-    "subtype": "package",
-    "package-id": "lnbits",
-    "target": "tor-address",
-    "interface": "main",
+    name: "Tor Address",
+    description: "The Tor address of the network interface",
+    type: "pointer",
+    subtype: "package",
+    "package-id": "lastpaywins",
+    target: "tor-address",
+    interface: "main",
   },
   "lan-address": {
-    "name": "LAN Address",
-    "description": "The LAN address of the network interface",
-    "type": "pointer",
-    "subtype": "package",
-    "package-id": "lnbits",
-    "target": "lan-address",
-    "interface": "main",
+    name: "LAN Address",
+    description: "The LAN address of the network interface",
+    type: "pointer",
+    subtype: "package",
+    "package-id": "lastpaywins",
+    target: "lan-address",
+    interface: "main",
   },
-  "implementation": {
-    "type": "enum",
-    "name": "Lightning Implementation",
-    "description": "The underlying Lightning implementation, currently LND or Core Lightning (CLN)",
-    "values": ["LndRestWallet", "CLightningWallet"],
-    'value-names': {
-      "LndRestWallet": "LND",
-      "CLightningWallet": "Core Lightning",
-    },
-    "default": "LndRestWallet",
-  }
 });
